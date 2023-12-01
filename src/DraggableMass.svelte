@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Dot from "./Dot.svelte";
     import { Point, type Mass } from "./Structures";
 
     export let mass: Mass;
@@ -58,9 +57,6 @@
 {mass.name}                        
 </div>
 
-<Dot p={mass.point.add(offset)} />
-
-<!--Figure out how to have a bottom connector that could be either spring or pendulum-->
 {#if mass.bottomConnector}
 <svelte:component this={mass.bottomConnector.component} connector={mass.bottomConnector} {offset} editable={editable.y}/>
 {/if}
@@ -69,7 +65,7 @@
 <style>
     .weight {
         position: absolute;
-        background-color: blue;
+        background-color: #AEC6CF;
         border-radius: 50%;
         color: white;
     }

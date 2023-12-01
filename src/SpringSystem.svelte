@@ -1,66 +1,89 @@
 <script lang="ts">
+  import Box from "./Box.svelte";
   import SpringComponent from "./SpringComponent.svelte";
   import { Point, Mass, Spring } from "./Structures";
 
-  export let springs;
+  let springs = 2;
 
-  let topMass = new Mass(0, 100, 10, 0);
-  let topSpring = new Spring(0, 0, 5, topMass);
+  let topMass: Mass;
+  let topSpring: Spring;
+  let lastMass: Mass;
+  let masses: Mass[];
+  updateSprings();
+  //topMass.updateConnector();
 
-  let lastMass = topMass;
-  let masses = [topMass];
-  for (let i = 1; i < springs; i++)
-  {
-    let bottomMass = new Mass(0, 100 + i * 100, 10, 0);
-    let bottomSpring = new Spring(0, 0, 5, bottomMass);
-    lastMass.bottomConnector = bottomSpring;
-    
-    lastMass = bottomMass;  
-    masses.push(lastMass);
-  }
-  masses.forEach(m => {
-    m.updateConnector() 
-  });
 
-  let topSpringOffset = new Point(500, 200);
-  let started = false;
+  //let lastMass = topMass;
+  //let masses = [topMass];
+
+  let topSpringOffset = new Point(500, 0);
+  export let started = false;
   let intervalId: number;
 
   let interval = 20;
-  let h = .1;
-  let t = 0; // t is not used, but we have it so the function signatures line up 
-  function start()
-  {
-    started = true;
-    intervalId = setInterval(update, interval);
-  }
+  export let h = 0.01;
+  let mIndex = 0;
+  $: currentMass = masses[mIndex];
 
-  function pause()
+  export function update()
   {
-    started = false;
-    clearInterval(intervalId)
-  }
-
-  function update()
-  {
-    topSpring.simulationStep();
+    topSpring.simulationStep(h);
     topSpring = topSpring;
+  }
+
+  export function extraStart()
+  {
+    masses.forEach(m => {
+      m.point.dy = 0; 
+    }); 
+  }
+
+  function applyToAll() 
+  {
+    for (let i = 0; i < masses.length; i++)
+    {
+      let m = masses[i];
+      m.mass = currentMass.mass; 
+      m.damping = currentMass.damping;
+
+      if (m.topConnector && currentMass.topConnector)
+        m.topConnector.constant = currentMass.topConnector.constant
+    }
+  }
+
+  function updateSprings() 
+  {
+    topMass = new Mass(0, 100, 1, 0);
+    topSpring = new Spring(0, 0, 5, topMass);
+
+    lastMass = topMass;
+    masses = [topMass];
+    for (let i = 1; i < springs; i++)
+    {
+      let bottomMass = new Mass(0, 100 + i * 100, 1, 0);
+      let bottomSpring = new Spring(0, 0, 5, bottomMass);
+      lastMass.bottomConnector = bottomSpring;
+      
+      lastMass = bottomMass;  
+      masses.push(lastMass);
+    }
+    masses.forEach(m => {
+      m.updateConnector() 
+    });
   }
 
 </script>
 
+<h1>Spring System</h1>
+<Box>
 <SpringComponent connector={topSpring} editable={!started} offset={topSpringOffset}></SpringComponent>
-{#if !started}
-<button on:click={start}>Start</button>
-{:else}
-<button on:click={pause}>Pause</button>
-{/if} <br />
-From top to bottom <br />
-{#each masses as m, i}
-  Spring #{i}: <br />
-  {#if m.topConnector}
-    Spring constant: <input bind:value={m.topConnector.constant} type="number" /> <br />
-  {/if}
-  Mass: <input bind:value={m.mass} type="number" /> <br />
-  Damping: <input bind:value={m.damping} type="number" /> <br /><br />
-{/each}
+Spring Count: <input type="number" bind:value={springs} on:change={updateSprings}/> <br />
+<button on:click={() => mIndex = (mIndex + 1) % masses.length} >Next</button>
+Spring #{mIndex + 1}: <br />
+{#if currentMass.topConnector}
+  Spring constant: <input bind:value={currentMass.topConnector.constant} type="number" /> <br />
+{/if}
+Mass: <input bind:value={currentMass.mass} type="number" /> <br />
+Damping: <input bind:value={currentMass.damping} type="number" step=".2"/> <br />
+<button on:click={applyToAll}>Apply to all</button><br /><br />
+</Box>

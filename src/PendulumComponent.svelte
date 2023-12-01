@@ -1,12 +1,9 @@
 <script lang="ts">
     import DraggableMass from "./DraggableMass.svelte";
-  import Force from "./Force.svelte";
     import { Point, type Pendulum } from "./Structures";
-  import { GRAVITY } from "./constants";
 
     export let connector: Pendulum;
     export let offset: Point = new Point(0, 0);
-
     export let editable = true;
 </script>
 
@@ -21,9 +18,9 @@ style="left:{connector.start.x + offset.x}px;
 
 <style>
     .pendulum {
-        z-index: 100;
+        z-index: -100;
         position: absolute;
-        background-color: silver;
+        background-color: #E8E8E8;
         height: 10px;
         transform-origin: 0% 0%;
     }

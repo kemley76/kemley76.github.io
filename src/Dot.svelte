@@ -1,6 +1,4 @@
 <script lang="ts">
-  import type { Point } from "./Structures";
-
     export let p: {x: number, y: number};
 </script>
 
@@ -12,7 +10,7 @@
         position: absolute;
         width: 5px;
         height: 5px;
-        background-color: red;
+        background-color: #E8E8E8;
         border-radius: 50%;
         z-index: 100;
     }

@@ -48,12 +48,10 @@ export class Connector {
         return new Point(0, 0);
     }
     
-    simulationStep(): void {}
+    simulationStep(h: number): void {}
 }
 
 export class Spring extends Connector {
-    static h = 0.1;
-
     component = SpringComponent;
 
     constructor(x: number, y: number, constant: number, mass: Mass)
@@ -72,16 +70,15 @@ export class Spring extends Connector {
         return this.direction().multiply(-this.constant);
     }
 
-    simulationStep() {
+    simulationStep(h: number) {
         if (this.bottomMass)
         {
-            this.bottomMass.simulationStep(this.force());
+            this.bottomMass.simulationStep(this.force(), h);
         }
     }
 }
 
 export class Pendulum extends Connector {
-    static h = 0.1;
     component = PendulumComponent;
 
     dtheta: number;
@@ -111,19 +108,19 @@ export class Pendulum extends Connector {
         return new Point(sin * tension, -cos * tension);
     }
 
-    simulationStep() {
+    simulationStep(h: number) {
         if (this.bottomMass)
         {
             //this.dtheta -= Spring.h * GRAVITY / this.massMagnitude() * Math.sin(this.theta - Math.PI / 2);
             //this.theta += Spring.h * this.dtheta;
             //this.setAngle(this.theta);
-            this.bottomMass.simulationStep(this.force());
-            this.theta = this.angle();
+            this.bottomMass.simulationStep(this.force(), h);
+            //this.theta = this.angle();
         }
     }
     
     setAngle(theta: number) {
-        this.bottomMass.setPoint(new Point(Math.cos(theta), Math.sin(theta)).multiply(this.constant).add(this.start));
+        this.bottomMass.setPoint(new Point(Math.cos(theta + Math.PI / 2), Math.sin(theta + Math.PI / 2)).multiply(this.constant).add(this.start));
     }
 }
 
@@ -143,7 +140,7 @@ export class Mass {
         this.name = "";
     }
 
-    simulationStep(force: Point)
+    simulationStep(force: Point, h: number)
     {
         // y'' = m * g - k * y - gamma * y' 
         // add force of connector and gravity 
@@ -160,11 +157,11 @@ export class Mass {
         else 
             acceleration = acceleration.divide(this.mass);
 
-        this.point.dx += Spring.h * acceleration.x;
-        this.point.dy += Spring.h * acceleration.y;
+        this.point.dx += h * acceleration.x;
+        this.point.dy += h * acceleration.y;
 
-        this.point.y += Spring.h * this.point.dy;
-        this.point.x += Spring.h * this.point.dx;
+        this.point.y += h * this.point.dy;
+        this.point.x += h * this.point.dx;
 
         /*if (this.topConnector && this.topConnector.start.y > this.topConnector.end.y && this.point.dy < 0)
         {
@@ -178,7 +175,7 @@ export class Mass {
         this.setY(this.point.y);
         this.setX(this.point.x);
 
-        this.bottomConnector?.simulationStep();
+        this.bottomConnector?.simulationStep(h);
     }
 
     size(): number {
@@ -192,7 +189,7 @@ export class Mass {
         if (this.topConnector)
         {
             // TODO: Make the positioning on the ends a little better
-            this.topConnector.theta = this.topConnector.angle();
+            //this.topConnector.theta = this.topConnector.angle();
         }
     }
 

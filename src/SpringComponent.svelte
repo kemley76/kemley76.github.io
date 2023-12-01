@@ -17,18 +17,15 @@ style="left:{connector.start.x + offset.x}px;
         45deg, 
         transparent,
         transparent {5 + connector.constant}%,
-        #222222 {5 + connector.constant}%,
-        #222222 {(5 + connector.constant) * 2}%
-    );
-    "/>
-
+        #E8E8E8 {5 + connector.constant}%,
+        #E8E8E8 {(5 + connector.constant) * 2}%
+    )"/>
 <svelte:component this={DraggableMass} bind:mass={connector.bottomMass} editable={{x: false, y: editable}} offset={offset}/>
 <style>
     .spring {
-        z-index: 100;
+        z-index: -100;
         position: absolute;
-        background-color: silver;
-        height: 10px;
+        height: 15px;
         transform-origin: 0% 0%;
         background-color: #e5e5f7;
         opacity: 0.8;
